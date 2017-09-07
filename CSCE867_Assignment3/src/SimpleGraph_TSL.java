@@ -222,6 +222,10 @@ public class SimpleGraph_TSL {
 	public void hasLabel() {
 		// test case 17
 		SingleGraph sg = makeSingleGraph("hasLabel");
+		String key = "KeyString";
+		String value = "KeyValue";
+		sg.addAttribute(key,value);
+		assertTrue("getLabel could not find attribute with key "+key,sg.hasLabel(key));
 	}
 }
 
