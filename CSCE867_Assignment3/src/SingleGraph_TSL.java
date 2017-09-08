@@ -14,9 +14,10 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.NullAttributeException;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.stream.ElementSink;
+import org.graphstream.ui.view.Viewer;
 import org.junit.Test;
 
-public class SimpleGraph_TSL {
+public class SingleGraph_TSL {
 
 	boolean edgeAddDetected, graphClearDetected, edgeRemoveDetected,
 	        nodeAddDetected, nodeRemoveDetected,stepBeginDetected;
@@ -28,10 +29,6 @@ public class SimpleGraph_TSL {
 	}
 	private SingleGraph makeSingleGraph(String id, boolean strict, boolean auto_c) {
 		SingleGraph sg = new SingleGraph(id, strict, auto_c);
-		return sg;
-	}
-	private SingleGraph makeSingleGraph(String id, boolean strict, boolean auto_c, int nodes, int edges) {
-		SingleGraph sg = new SingleGraph(id, strict, auto_c, nodes, edges);
 		return sg;
 	}
 
@@ -361,7 +358,7 @@ public class SimpleGraph_TSL {
 		sg.addNode("Node3");
 		sg.addNode("Node4");
 		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
-		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge2", "Node2", "Node3");
 		sg.addEdge("Edge3", "Node3", "Node4");
 		sg.addEdge("Edge4", "Node4", "Node1");
 		assertTrue("RemoveEdgeById wrong # of starting edges",sg.getEdgeCount() == 4);
@@ -377,7 +374,7 @@ public class SimpleGraph_TSL {
 		sg.addNode("Node3");
 		sg.addNode("Node4");
 		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
-		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge2", "Node2", "Node3");
 		sg.addEdge("Edge3", "Node3", "Node4");
 		sg.addEdge("Edge4", "Node4", "Node1");
 		assertTrue("RemoveEdgeByIdx wrong # of starting edges",sg.getEdgeCount() == 4);
@@ -393,7 +390,7 @@ public class SimpleGraph_TSL {
 		sg.addNode("Node3");
 		sg.addNode("Node4");
 		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
-		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge2", "Node2", "Node3");
 		sg.addEdge("Edge3", "Node3", "Node4");
 		sg.addEdge("Edge4", "Node4", "Node1");
 		assertTrue("RemoveEdgeByEdge wrong # of starting edges",sg.getEdgeCount() == 4);
@@ -409,7 +406,7 @@ public class SimpleGraph_TSL {
 		sg.addNode("Node3");
 		sg.addNode("Node4");
 		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
-		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge2", "Node2", "Node3");
 		sg.addEdge("Edge3", "Node3", "Node4");
 		sg.addEdge("Edge4", "Node4", "Node1");
 		assertTrue("RemoveEdgeByNodeIds wrong # of starting edges",sg.getEdgeCount() == 4);
@@ -427,7 +424,7 @@ public class SimpleGraph_TSL {
 		sg.addNode("Node3");
 		sg.addNode("Node4");
 		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
-		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge2", "Node2", "Node3");
 		sg.addEdge("Edge3", "Node3", "Node4");
 		sg.addEdge("Edge4", "Node4", "Node1");
 		assertTrue("RemoveEdgeByNodeIds wrong # of starting edges",sg.getEdgeCount() == 4);
@@ -467,64 +464,180 @@ public class SimpleGraph_TSL {
 		assertFalse("null attrs are errors unexpectedly true on init",sg.nullAttributesAreErrors());
 		sg.setNullAttributesAreErrors(true);
 		assertTrue("null attrs are errors should be true",sg.nullAttributesAreErrors());
+		String badval = null;
 		try {
-		String badval = sg.getAttribute(key);
+		    badval = sg.getAttribute(key);
 		} catch (NullAttributeException e) {
-			assertTrue("", true);
+			assertTrue("value "+badval+" returned on key "+key, true);
 		} catch (Exception e) {
 			fail("unexpected exception for null attrs are errors test: "+e.getMessage());
 		}
 	}
 	@Test
-	public void TestCase36() {
-		SingleGraph sg = makeSingleGraph("TestCase36", true, false);
+	public void ClearGraph() {
+		SingleGraph sg = makeSingleGraph("ClearGraphTest", true, false);
 		sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addEdge("EdgeDirected1", "Node1", "Node2", true);
+		assertTrue("wrong # of nodes before clear",sg.getNodeCount() == 2);
+		assertTrue("wrong # of edges before clear", sg.getEdgeCount() == 1);
+		sg.clear();
+		assertTrue("wrong # of nodes after clear",sg.getNodeCount() == 0);
+		assertTrue("wrong # of edges after clear", sg.getEdgeCount() == 0);
+	}
+	@Test
+	public void DisplayGraph() {
+		SingleGraph sg = makeSingleGraph("ClearGraphTest", true, false);
+		sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addEdge("EdgeDirected1", "Node1", "Node2", true);
+		assertTrue("wrong # of nodes before clear",sg.getNodeCount() == 2);
+		assertTrue("wrong # of edges before clear", sg.getEdgeCount() == 1);
+		Viewer view = sg.display();
+		assertTrue("null viewer returned by display",view != null);
+	}
+	@Test
+	public void TestCase38() {
+		SingleGraph sg = makeSingleGraph("TestCase38", true, false);
+		Node node1 = sg.addNode("Node1");
 		sg.addNode("Node2");
 		sg.addEdge("EdgeDirected1", "Node1", "Node2", true);
 		Iterator<Node> node_iter = sg.getNodeIterator();
 		Iterator<Edge> edge_iter = sg.getEdgeIterator();
+		String key = "attrib_key";
+		String nvalue = "node_attrib_value";
+		String evalue = "edge_attrib_value";
+		while(node_iter.hasNext()) {
+			Node node = node_iter.next();
+			node.addAttribute(key, nvalue);
+			assertTrue("attr label not found",node.hasLabel(key));
+		}
+		while(edge_iter.hasNext()){
+			Edge edge = edge_iter.next();
+			edge.addAttribute(key, evalue);
+			assertTrue("attr label not found",edge.hasLabel(key));
+			assertTrue("edge not directed",edge.isDirected());
+		}
+		assertTrue("attr label not found", node1.hasLabel(key));
 	}
-	
-	/**
-	 * Graph Event handler
-	 *
-	 */
-	class SimpleGraphEventSink implements ElementSink {
-		@Override
-		public void edgeAdded(String arg0, long arg1, String arg2, String arg3,
-				String arg4, boolean arg5) {
-			edgeAddDetected = true;
-			
+	@Test
+	public void TestCase39() {
+		SingleGraph sg = makeSingleGraph("TestCase39", true, false);
+		Node node1 = sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addEdge("EdgeDirected1", "Node1", "Node2", false);
+		Iterator<Node> node_iter = sg.getNodeIterator();
+		Iterator<Edge> edge_iter = sg.getEdgeIterator();
+		String key = "attrib_key";
+		String nvalue = "node_attrib_value";
+		String evalue = "edge_attrib_value";
+		while(node_iter.hasNext()) {
+			Node node = node_iter.next();
+			node.addAttribute(key, nvalue);
+			assertTrue("attr label not found",node.hasLabel(key));
 		}
-
-		@Override
-		public void edgeRemoved(String arg0, long arg1, String arg2) {
-			edgeRemoveDetected = true;
-			
+		while(edge_iter.hasNext()){
+			Edge edge = edge_iter.next();
+			edge.addAttribute(key, evalue);
+			assertTrue("attr label not found",edge.hasLabel(key));
+			assertFalse("edge not directed",edge.isDirected());
 		}
-
-		@Override
-		public void graphCleared(String arg0, long arg1) {
-			graphClearDetected = true;
-			
+		assertTrue("attr label not found", node1.hasLabel(key));
+	}
+	@Test
+	public void TestCase40() {
+		SingleGraph sg = makeSingleGraph("TestCase40", false, true);
+		Node node1 = sg.addNode("Node1");
+		// auto-create-node
+		sg.addEdge("EdgeDirected1", "Node1", "Node2", true);
+		Iterator<Node> node_iter = sg.getNodeIterator();
+		Iterator<Edge> edge_iter = sg.getEdgeIterator();
+		String key = "attrib_key";
+		String nvalue = "node_attrib_value";
+		String evalue = "edge_attrib_value";
+		while(node_iter.hasNext()) {
+			Node node = node_iter.next();
+			node.addAttribute(key, nvalue);
+			assertTrue("attr label not found",node.hasLabel(key));
 		}
-
-		@Override
-		public void nodeAdded(String arg0, long arg1, String arg2) {
-			nodeAddDetected = true;
-			
+		while(edge_iter.hasNext()){
+			Edge edge = edge_iter.next();
+			edge.addAttribute(key, evalue);
+			assertTrue("attr label not found",edge.hasLabel(key));
+			assertTrue("edge not directed",edge.isDirected());
 		}
-
-		@Override
-		public void nodeRemoved(String arg0, long arg1, String arg2) {
-			nodeRemoveDetected = true;
-			
+		assertTrue("attr label not found", node1.hasLabel(key));
+	}
+	@Test
+	public void TestCase41() {
+		SingleGraph sg = makeSingleGraph("TestCase41", false, true);
+		Node node1 = sg.addNode("Node1");
+		// auto-create-node
+		sg.addEdge("EdgeDirected1", "Node1", "Node2", false);
+		Iterator<Node> node_iter = sg.getNodeIterator();
+		Iterator<Edge> edge_iter = sg.getEdgeIterator();
+		String key = "attrib_key";
+		String nvalue = "node_attrib_value";
+		String evalue = "edge_attrib_value";
+		while(node_iter.hasNext()) {
+			Node node = node_iter.next();
+			node.addAttribute(key, nvalue);
+			assertTrue("attr label not found",node.hasLabel(key));
 		}
-
-		@Override
-		public void stepBegins(String arg0, long arg1, double arg2) {
-			stepBeginDetected = true;
-			
+		while(edge_iter.hasNext()){
+			Edge edge = edge_iter.next();
+			edge.addAttribute(key, evalue);
+			assertTrue("attr label not found",edge.hasLabel(key));
+			assertFalse("edge not directed",edge.isDirected());
 		}
+		assertTrue("attr label not found", node1.hasLabel(key));
+	}
+	@Test
+	public void TestCase42() {
+		SingleGraph sg = makeSingleGraph("TestCase42", false, false);
+		Node node1 = sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addEdge("EdgeDirected1", "Node1", "Node2", true);
+		Iterator<Node> node_iter = sg.getNodeIterator();
+		Iterator<Edge> edge_iter = sg.getEdgeIterator();
+		String key = "attrib_key";
+		String nvalue = "node_attrib_value";
+		String evalue = "edge_attrib_value";
+		while(node_iter.hasNext()) {
+			Node node = node_iter.next();
+			node.addAttribute(key, nvalue);
+			assertTrue("attr label not found",node.hasLabel(key));
+		}
+		while(edge_iter.hasNext()){
+			Edge edge = edge_iter.next();
+			edge.addAttribute(key, evalue);
+			assertTrue("attr label not found",edge.hasLabel(key));
+			assertTrue("edge not directed",edge.isDirected());
+		}
+		assertTrue("attr label not found", node1.hasLabel(key));
+	}
+	@Test
+	public void TestCase43() {
+		SingleGraph sg = makeSingleGraph("TestCase43", false, false);
+		Node node1 = sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addEdge("EdgeDirected1", "Node1", "Node2", false);
+		Iterator<Node> node_iter = sg.getNodeIterator();
+		Iterator<Edge> edge_iter = sg.getEdgeIterator();
+		String key = "attrib_key";
+		String nvalue = "node_attrib_value";
+		String evalue = "edge_attrib_value";
+		while(node_iter.hasNext()) {
+			Node node = node_iter.next();
+			node.addAttribute(key, nvalue);
+			assertTrue("attr label not found",node.hasLabel(key));
+		}
+		while(edge_iter.hasNext()){
+			Edge edge = edge_iter.next();
+			edge.addAttribute(key, evalue);
+			assertTrue("attr label not found",edge.hasLabel(key));
+			assertFalse("edge not directed",edge.isDirected());
+		}
+		assertTrue("attr label not found", node1.hasLabel(key));
 	}
 }
