@@ -26,7 +26,7 @@ public class SingleGraph_TSL_Tests {
 		SingleGraph sg = new SingleGraph(id, strict, auto_c);
 		return sg;
 	}
-
+	// singleton tests
 	@Test
 	public void StrictByMethodTest() {
 		// test case 1
