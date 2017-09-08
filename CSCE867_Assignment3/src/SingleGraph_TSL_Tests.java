@@ -15,7 +15,7 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.Viewer;
 import org.junit.Test;
 
-public class SingleGraph_TSL {
+public class SingleGraph_TSL_Tests {
 
 	// constructor methods to simplify test cases
 	private SingleGraph makeSingleGraph(String id) {
