@@ -3,9 +3,12 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.ElementNotFoundException;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
@@ -225,7 +228,100 @@ public class SimpleGraph_TSL {
 		String key = "KeyString";
 		String value = "KeyValue";
 		sg.addAttribute(key,value);
-		assertTrue("getLabel could not find attribute with key "+key,sg.hasLabel(key));
+		assertTrue("hasLabel could not find attribute with key "+key,sg.hasLabel(key));
+	}
+	@Test
+	public void hasNumber() {
+		// test case 18
+		SingleGraph sg = makeSingleGraph("hasNumber");
+		String key = "KeyString";
+		double value = 1.2345;
+		sg.addAttribute(key,value);
+		assertTrue("hasNumber could not find attribute with key "+key,sg.hasNumber(key));
+	}
+	@Test
+	public void hasHash() {
+		// test case 19
+		SingleGraph sg = makeSingleGraph("hasHash");
+		String key = "KeyString";
+		HashMap<Integer,String> hm = new HashMap<Integer,String>();
+		hm.put(new Integer(1), "String1");
+		hm.put(new Integer(2), "String2");
+		sg.addAttribute(key,hm);
+		assertTrue("hasHash could not find attribute with key "+key,sg.hasHash(key));
+	}
+	@Test
+	public void hasAttribute() {
+		// test case 20
+		SingleGraph sg = makeSingleGraph("hasAttribute");
+		String key = "KeyString";
+		String value = "KeyValue";
+		sg.addAttribute(key,value);
+		assertTrue("hasAttribute could not find attribute with key "+key,sg.hasAttribute(key));
+	}
+	@Test
+	public void hasVector() {
+		// test case 21
+		SingleGraph sg = makeSingleGraph("hasVector");
+		String key = "KeyString";
+		ArrayList<String> value = new ArrayList<String>();
+		value.add("String1");
+		value.add("String");
+		sg.addAttribute(key,value);
+		assertTrue("hasVector could not find attribute with key "+key,sg.hasVector(key));
+	}
+	@Test
+	public void hasArray() {
+		// test case 22
+		SingleGraph sg = makeSingleGraph("ArrayAttr");
+		Object[] array = new Object[2];
+		array[0] = new String("String1");
+		array[1] = new String("String2");
+		String key = "KeyString";
+		sg.addAttribute(key, array);
+		assertTrue("hasArray could not find attribute with key "+key,sg.hasArray(key));
+	}
+	@Test
+	public void getNodeBySet() {
+		// test case 23
+		SingleGraph sg = makeSingleGraph("ArrayAttr");
+		sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addNode("Node3");
+		sg.addNode("Node4");
+		Collection<Node> nodeset = sg.getNodeSet();
+		assertFalse("getNodeBySet node set empty",nodeset.isEmpty());
+		int node_cnt = 0;
+		Iterator<Node> iter = nodeset.iterator();
+		while(iter.hasNext()) {
+			Object node = iter.next();
+			assertTrue("getNodeBySet non-node in set",node instanceof Node);
+			node_cnt++;
+		}
+		assertTrue("getNodeBySet wrong # of nodes",node_cnt == 4);
+	}
+	@Test
+	public void getEdgesBySet() {
+		// test case 23
+		SingleGraph sg = makeSingleGraph("ArrayAttr");
+		sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addNode("Node3");
+		sg.addNode("Node4");
+		sg.addEdge("Edge1", "Node1", "Node2");
+		sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge3", "Node3", "Node4");
+		sg.addEdge("Edge4", "Node4", "Node1");
+		Collection<Edge> edge_set = sg.getEdgeSet();
+		assertFalse("getEdgesBySet edge set empty",edge_set.isEmpty());
+		int edge_cnt = 0;
+		Iterator<Edge> iter = edge_set.iterator();
+		while(iter.hasNext()) {
+			Object edge = iter.next();
+			assertTrue("getEdgesBySet set element not an Edge object", edge instanceof Edge);
+			edge_cnt++;
+		}
+		assertTrue("getEdgesBySet incorrect number of edges in set", edge_cnt == 4);
 	}
 }
 
