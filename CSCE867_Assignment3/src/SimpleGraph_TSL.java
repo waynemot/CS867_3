@@ -11,11 +11,16 @@ import java.util.Vector;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.ElementNotFoundException;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.NullAttributeException;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.stream.ElementSink;
 import org.junit.Test;
 
 public class SimpleGraph_TSL {
 
+	boolean edgeAddDetected, graphClearDetected, edgeRemoveDetected,
+	        nodeAddDetected, nodeRemoveDetected,stepBeginDetected;
+	
 	// constructor methods to simplify test cases
 	private SingleGraph makeSingleGraph(String id) {
 		SingleGraph sg = new SingleGraph(id);
@@ -273,7 +278,7 @@ public class SimpleGraph_TSL {
 	@Test
 	public void hasArray() {
 		// test case 22
-		SingleGraph sg = makeSingleGraph("ArrayAttr");
+		SingleGraph sg = makeSingleGraph("hasArray");
 		Object[] array = new Object[2];
 		array[0] = new String("String1");
 		array[1] = new String("String2");
@@ -284,7 +289,7 @@ public class SimpleGraph_TSL {
 	@Test
 	public void getNodeBySet() {
 		// test case 23
-		SingleGraph sg = makeSingleGraph("ArrayAttr");
+		SingleGraph sg = makeSingleGraph("getNodeBySet");
 		sg.addNode("Node1");
 		sg.addNode("Node2");
 		sg.addNode("Node3");
@@ -302,8 +307,8 @@ public class SimpleGraph_TSL {
 	}
 	@Test
 	public void getEdgesBySet() {
-		// test case 23
-		SingleGraph sg = makeSingleGraph("ArrayAttr");
+		// test case 24
+		SingleGraph sg = makeSingleGraph("getEdgesBySet");
 		sg.addNode("Node1");
 		sg.addNode("Node2");
 		sg.addNode("Node3");
@@ -323,5 +328,203 @@ public class SimpleGraph_TSL {
 		}
 		assertTrue("getEdgesBySet incorrect number of edges in set", edge_cnt == 4);
 	}
-}
+	@Test
+	public void RemoveNodeById() {
+		// test case 25
+		SingleGraph sg = makeSingleGraph("RemoveNodeById");
+		Node node1 = sg.addNode("Node1");
+		sg.removeNode(node1.getId());
+		assertTrue("RemoveNodeById incorrect node count after rmv",sg.getNodeCount() == 0);
+	}
+	@Test
+	public void RemoveNodeByIdx() {
+		// test case 26
+		SingleGraph sg = makeSingleGraph("RemoveNodeByIdx");
+		Node node1 = sg.addNode("Node1");
+		sg.removeNode(node1.getIndex());
+		assertTrue("RemoveNodeByIdx incorrect node count after rmv",sg.getNodeCount() == 0);
+	}
+	@Test
+	public void RemoveNodeByNode() {
+		// test case 27
+		SingleGraph sg = makeSingleGraph("RemoveNodeByNode");
+		Node node1 = sg.addNode("Node1");
+		sg.removeNode(node1);
+		assertTrue("RemoveNodeById incorrect node count after rmv",sg.getNodeCount() == 0);
+	}
+	@Test
+	public void RemoveEdgeById() {
+		// test case 28
+		SingleGraph sg = makeSingleGraph("ArrayAttr");
+		sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addNode("Node3");
+		sg.addNode("Node4");
+		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
+		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge3", "Node3", "Node4");
+		sg.addEdge("Edge4", "Node4", "Node1");
+		assertTrue("RemoveEdgeById wrong # of starting edges",sg.getEdgeCount() == 4);
+		sg.removeEdge(edge1.getId());
+		assertTrue("RemoveEdgeById wrong # of edges after rmv",sg.getEdgeCount() == 3);
+	}
+	@Test
+	public void RemoveEdgeByIdx() {
+		// test case 29
+		SingleGraph sg = makeSingleGraph("RemoveEdgeByIdx");
+		sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addNode("Node3");
+		sg.addNode("Node4");
+		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
+		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge3", "Node3", "Node4");
+		sg.addEdge("Edge4", "Node4", "Node1");
+		assertTrue("RemoveEdgeByIdx wrong # of starting edges",sg.getEdgeCount() == 4);
+		sg.removeEdge(edge1.getIndex());
+		assertTrue("RemoveEdgeByIdx wrong # of edges after rmv",sg.getEdgeCount() == 3);
+	}
+	@Test
+	public void RemoveEdgeByEdge() {
+		// test case 30
+		SingleGraph sg = makeSingleGraph("RemoveEdgeByEdge");
+		sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addNode("Node3");
+		sg.addNode("Node4");
+		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
+		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge3", "Node3", "Node4");
+		sg.addEdge("Edge4", "Node4", "Node1");
+		assertTrue("RemoveEdgeByEdge wrong # of starting edges",sg.getEdgeCount() == 4);
+		sg.removeEdge(edge1);
+		assertTrue("RemoveEdgeByEdge wrong # of edges after rmv",sg.getEdgeCount() == 3);
+	}
+	@Test
+	public void RemoveEdgeByNodeIds() {
+		// test case 31
+		SingleGraph sg = makeSingleGraph("RemoveEdgeByNodeIds");
+		Node node1 = sg.addNode("Node1");
+		Node node2 = sg.addNode("Node2");
+		sg.addNode("Node3");
+		sg.addNode("Node4");
+		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
+		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge3", "Node3", "Node4");
+		sg.addEdge("Edge4", "Node4", "Node1");
+		assertTrue("RemoveEdgeByNodeIds wrong # of starting edges",sg.getEdgeCount() == 4);
+		sg.removeEdge(node1.getId(),node2.getId());
+		assertTrue("RemoveEdgeNodeIds wrong # of edges after rmv",sg.getEdgeCount() == 3);
+		Edge edge_tmp = sg.getEdge(edge1.getId());
+		assertTrue("non-null edge returned on getEdge after remove",edge_tmp == null);
+	}
+	@Test
+	public void RemoveEdgeByNodes() {
+		// test case 32
+		SingleGraph sg = makeSingleGraph("RemoveEdgeByNodes");
+		Node node1 = sg.addNode("Node1");
+		Node node2 = sg.addNode("Node2");
+		sg.addNode("Node3");
+		sg.addNode("Node4");
+		Edge edge1 = sg.addEdge("Edge1", "Node1", "Node2");
+		Edge edge2 = sg.addEdge("Edge2", "Node2", "Node3");
+		sg.addEdge("Edge3", "Node3", "Node4");
+		sg.addEdge("Edge4", "Node4", "Node1");
+		assertTrue("RemoveEdgeByNodeIds wrong # of starting edges",sg.getEdgeCount() == 4);
+		sg.removeEdge(node1,node2);
+		assertTrue("RemoveEdgeNodeIds wrong # of edges after rmv",sg.getEdgeCount() == 3);
+		Edge edge_tmp = sg.getEdge(edge1.getId());
+		assertTrue("non-null edge returned on getEdge after remove",edge_tmp == null);
+	}
+	@Test
+	public void RmvGraphAttribute() {
+		// test case 33
+		SingleGraph sg = makeSingleGraph("RmvGraphAttr");
+		String key = "KeyString";
+		String value = "AttributeValue";
+		sg.addAttribute(key, value);
+		assertTrue("RmvGraphAttribute wrong # of attrs after add",sg.getAttributeCount() == 1);
+		sg.removeAttribute(key);
+		assertTrue("RmvGraphAttribute wrong # of attrs after rmv",sg.getAttributeCount() == 0);
+	}
+	@Test
+	public void ChgGraphAttribute() {
+		// test case 34
+		SingleGraph sg = makeSingleGraph("ChgGraphAttr");
+		String key = "KeyString";
+		String value = "AttributeValue";
+		String changed_value = "OtherAttributeValue";
+		sg.addAttribute(key, value);
+		assertTrue("RmvGraphAttribute wrong # of attrs after add",sg.getAttributeCount() == 1);
+		sg.changeAttribute(key, changed_value);
+		assertTrue("RmvGraphAttribute wrong attr value after chg",((String)sg.getAttribute(key)).equals(changed_value));
+	}
+	@Test
+	public void NullAttrsAreErrors() {
+		// test case 35
+		SingleGraph sg = makeSingleGraph("addNodeAttr");
+		String key = "AttrKey";
+		assertFalse("null attrs are errors unexpectedly true on init",sg.nullAttributesAreErrors());
+		sg.setNullAttributesAreErrors(true);
+		assertTrue("null attrs are errors should be true",sg.nullAttributesAreErrors());
+		try {
+		String badval = sg.getAttribute(key);
+		} catch (NullAttributeException e) {
+			assertTrue("", true);
+		} catch (Exception e) {
+			fail("unexpected exception for null attrs are errors test: "+e.getMessage());
+		}
+	}
+	@Test
+	public void TestCase36() {
+		SingleGraph sg = makeSingleGraph("TestCase36", true, false);
+		sg.addNode("Node1");
+		sg.addNode("Node2");
+		sg.addEdge("EdgeDirected1", "Node1", "Node2", true);
+		Iterator<Node> node_iter = sg.getNodeIterator();
+		Iterator<Edge> edge_iter = sg.getEdgeIterator();
+	}
+	
+	/**
+	 * Graph Event handler
+	 *
+	 */
+	class SimpleGraphEventSink implements ElementSink {
+		@Override
+		public void edgeAdded(String arg0, long arg1, String arg2, String arg3,
+				String arg4, boolean arg5) {
+			edgeAddDetected = true;
+			
+		}
 
+		@Override
+		public void edgeRemoved(String arg0, long arg1, String arg2) {
+			edgeRemoveDetected = true;
+			
+		}
+
+		@Override
+		public void graphCleared(String arg0, long arg1) {
+			graphClearDetected = true;
+			
+		}
+
+		@Override
+		public void nodeAdded(String arg0, long arg1, String arg2) {
+			nodeAddDetected = true;
+			
+		}
+
+		@Override
+		public void nodeRemoved(String arg0, long arg1, String arg2) {
+			nodeRemoveDetected = true;
+			
+		}
+
+		@Override
+		public void stepBegins(String arg0, long arg1, double arg2) {
+			stepBeginDetected = true;
+			
+		}
+	}
+}
