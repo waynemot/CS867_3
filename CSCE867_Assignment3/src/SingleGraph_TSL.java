@@ -6,26 +6,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Vector;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.ElementNotFoundException;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.NullAttributeException;
 import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.stream.AttributeSink;
-import org.graphstream.stream.ElementSink;
 import org.graphstream.ui.view.Viewer;
 import org.junit.Test;
 
 public class SingleGraph_TSL {
 
-	boolean edgeAddDetected, graphClearDetected, edgeRemoveDetected,
-	        nodeAddDetected, nodeRemoveDetected,stepBeginDetected,
-	        nodeAttrRmvDetected, nodeAttrChgDetected, nodeAttrAddDetected,
-	        graphAttrRmvDetected, graphAttrChgDetected, graphAttrAddDetected,
-	        edgeAttrRmvDetected, edgeAttrChgDetected, edgeAttrAddDetected;
-	
 	// constructor methods to simplify test cases
 	private SingleGraph makeSingleGraph(String id) {
 		SingleGraph sg = new SingleGraph(id);
@@ -79,26 +70,20 @@ public class SingleGraph_TSL {
 	public void AttributeString() {
 		// test case 4
 		SingleGraph sg = makeSingleGraph("StringAttr");
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		String attrib = "String Attribute Value";
 		String key = "KeyString";
-		this.graphAttrAddDetected = false;
 		sg.addAttribute(key, attrib);
 		assertTrue("hasAttribute for String fails on key: "+key,sg.hasAttribute(key));
 		assertTrue("hasAttribute fails String class type",sg.hasAttribute(key,String.class));
-		assertTrue("graph attr add event not fired", this.graphAttrAddDetected);
 	}
 	@Test
 	public void AttributeDouble() {
 		// test case 5
 		SingleGraph sg = makeSingleGraph("StringAttr");
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		double attrib = 0.23456789;
 		String key = "KeyString";
-		this.graphAttrAddDetected = false;
 		sg.addAttribute(key, attrib);
 		assertTrue("hasNumber fails on double attribute", sg.hasNumber(key));
-		assertTrue("graph attr add event not fired", this.graphAttrAddDetected);
 	}
 	// docs imply this should work with ArrayList or Vector but
 	// only test done in actual code is to check for Object[] array
@@ -106,46 +91,37 @@ public class SingleGraph_TSL {
 	public void AttributeArray() {
 		// test case 6
 		SingleGraph sg = makeSingleGraph("ArrayAttr");
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		Object[] array = new Object[2];
 		array[0] = new String("String1");
 		array[1] = new String("String2");
 		String key = "KeyString";
-		this.graphAttrAddDetected = false;
 		sg.addAttribute(key, array);
 		assertTrue("hasArray fails on key: "+key,sg.hasArray(key));
 		assertTrue("hasAttribute fails on ArrayList by key",sg.hasAttribute(key));
 		assertTrue("hasAttribute fails on ArrayList class",sg.hasAttribute(key,Object.class));
-		assertTrue("graph attr add event not fired", this.graphAttrAddDetected);
 	}
 	@Test
 	public void AttributeHash() {
 		// test case 7
 		SingleGraph sg = makeSingleGraph("HashAttr");
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		HashMap<Integer,String> hm = new HashMap<Integer,String>();
 		hm.put(new Integer(1), "String1");
 		hm.put(new Integer(2), "String2");
 		String key = "KeyString";
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		sg.addAttribute(key, hm);
 		assertTrue("hasHash fails on HashMap",sg.hasHash(key));
-		assertTrue("graph attr add event not fired", this.graphAttrAddDetected);
 	}
 	// method is a misnomer, hasVector() expects to find an ArrayList
 	@Test
 	public void AttributeVector() {
 		// test case 8
 		SingleGraph sg = makeSingleGraph("VectorAttr");
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		ArrayList<String> vect = new ArrayList<String>();
 		vect.add("String1");
 		vect.add("String");
 		String key = "KeyString";
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		sg.addAttribute(key,vect);
 		assertTrue("hasVector did not find ArrayList attr",sg.hasVector(key));
-		assertTrue("graph attr add event not fired", this.graphAttrAddDetected);
 	}
 	// verify 0-length attribute key is invalid
 	@Test
@@ -182,39 +158,28 @@ public class SingleGraph_TSL {
 	public void CreateEdgeByNodeId() {
 		// test case 11
 		SingleGraph sg = makeSingleGraph("EdgeByNodeId");
-		sg.addElementSink(new SimpleGraphEventSink());
-		this.nodeAddDetected = false;
 		Node node1 = sg.addNode("Node1");
-		assertTrue("node add not detected", this.nodeAddDetected);
 		Node node2 = sg.addNode("Node2");
-		this.edgeAddDetected = false;
 		sg.addEdge("Edge1", node1.getId(), node2.getId());
 		assertTrue("wrong edge returned or edge ID wrong by ID",sg.getEdge("Edge1").getId().equals("Edge1"));
-		assertTrue("edge add not detected",this.edgeAddDetected);
 	}
 	@Test
 	public void CreateEdgeByNode() {
 		// test case 12
 		SingleGraph sg = makeSingleGraph("EdgeByNode");
-		sg.addElementSink(new SimpleGraphEventSink());
 		Node node1 = sg.addNode("Node1");
 		Node node2 = sg.addNode("Node2");
-		this.edgeAddDetected = false;
 		sg.addEdge("Edge1", node1, node2);
 		assertTrue("wrong edge returned or edge ID wrong by Node",sg.getEdge("Edge1").getId().equals("Edge1"));
-		assertTrue("edge add not detected",this.edgeAddDetected);
 	}
 	@Test
 	public void CreateEdgeByIdx() {
 		// test case 13
 		SingleGraph sg = makeSingleGraph("EdgeByNodeIdx");
-		sg.addElementSink(new SimpleGraphEventSink());
 		Node node1 = sg.addNode("Node1");
 		Node node2 = sg.addNode("Node2");
-		this.edgeAddDetected = false;
 		sg.addEdge("Edge1", node1.getIndex(), node2.getIndex());
 		assertTrue("wrong edge returned or edge ID wrong by IDX",sg.getEdge("Edge1").getId().equals("Edge1"));
-		assertTrue("edge add not detected",this.edgeAddDetected);
 	}
 	//
 	// test directed edge adds
@@ -360,11 +325,8 @@ public class SingleGraph_TSL {
 		// test case 25
 		SingleGraph sg = makeSingleGraph("RemoveNodeById");
 		Node node1 = sg.addNode("Node1");
-		sg.addElementSink(new SimpleGraphEventSink());
-		this.nodeRemoveDetected = false;
 		sg.removeNode(node1.getId());
 		assertTrue("RemoveNodeById incorrect node count after rmv",sg.getNodeCount() == 0);
-		assertTrue("remove node event not fired",this.nodeRemoveDetected);
 	}
 	@Test
 	public void RemoveNodeByIdx() {
@@ -470,30 +432,24 @@ public class SingleGraph_TSL {
 	public void RmvGraphAttribute() {
 		// test case 33
 		SingleGraph sg = makeSingleGraph("RmvGraphAttr");
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		String key = "KeyString";
 		String value = "AttributeValue";
 		sg.addAttribute(key, value);
 		assertTrue("RmvGraphAttribute wrong # of attrs after add",sg.getAttributeCount() == 1);
-		this.graphAttrRmvDetected = false;
 		sg.removeAttribute(key);
 		assertTrue("RmvGraphAttribute wrong # of attrs after rmv",sg.getAttributeCount() == 0);
-		assertTrue("rmv graph attr event not fired",this.graphAttrRmvDetected);
 	}
 	@Test
 	public void ChgGraphAttribute() {
 		// test case 34
 		SingleGraph sg = makeSingleGraph("ChgGraphAttr");
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		String key = "KeyString";
 		String value = "AttributeValue";
 		String changed_value = "OtherAttributeValue";
 		sg.addAttribute(key, value);
 		assertTrue("RmvGraphAttribute wrong # of attrs after add",sg.getAttributeCount() == 1);
-		this.graphAttrChgDetected = false;
 		sg.changeAttribute(key, changed_value);
 		assertTrue("RmvGraphAttribute wrong attr value after chg",((String)sg.getAttribute(key)).equals(changed_value));
-		assertTrue("graph chg attr event not fired",this.graphAttrChgDetected);
 	}
 	@Test
 	public void NullAttrsAreErrors() {
@@ -515,15 +471,12 @@ public class SingleGraph_TSL {
 	@Test
 	public void ClearGraph() {
 		SingleGraph sg = makeSingleGraph("ClearGraphTest", true, false);
-		sg.addElementSink(new SimpleGraphEventSink());
 		sg.addNode("Node1");
 		sg.addNode("Node2");
 		sg.addEdge("EdgeDirected1", "Node1", "Node2", true);
 		assertTrue("wrong # of nodes before clear",sg.getNodeCount() == 2);
 		assertTrue("wrong # of edges before clear", sg.getEdgeCount() == 1);
-		this.graphClearDetected = false;
 		sg.clear();
-		assertTrue("graph clear event not sensed", this.graphClearDetected);
 		assertTrue("wrong # of nodes after clear",sg.getNodeCount() == 0);
 		assertTrue("wrong # of edges after clear", sg.getEdgeCount() == 0);
 	}
@@ -551,33 +504,20 @@ public class SingleGraph_TSL {
 		String n2value = "node_chgd_value";
 		String evalue = "edge_attrib_value";
 		String e2value = "edge_chgd_value";
-		sg.addAttributeSink(new SimpleGraphEventSink());
 		while(node_iter.hasNext()) {
 			Node node = node_iter.next();
-			this.nodeAttrAddDetected = false;
 			node.addAttribute(key, nvalue);
 			assertTrue("attr label not found",node.hasLabel(key));
-			assertTrue("node attr add event not fired", this.nodeAttrAddDetected);
-			this.nodeAttrChgDetected = false;
 			node.changeAttribute(key, n2value);
-			assertTrue("node attr chg event not fired", this.nodeAttrChgDetected);
-			this.nodeAttrRmvDetected = false;
 			node.clearAttributes();
-			assertTrue("node attr rmv event not fired on clear", this.nodeAttrRmvDetected);
 		}
 		while(edge_iter.hasNext()){
 			Edge edge = edge_iter.next();
-			this.edgeAttrAddDetected = false;
 			edge.addAttribute(key, evalue);
 			assertTrue("attr label not found",edge.hasLabel(key));
 			assertTrue("edge not directed",edge.isDirected());
-			assertTrue("edge attr add event not fired",this.edgeAttrAddDetected);
-			this.edgeAttrChgDetected = false;
 			edge.changeAttribute(key, e2value);
-			assertTrue("edge attr chg event not fired", this.edgeAttrChgDetected);
-			this.edgeAttrRmvDetected = false;
 			edge.clearAttributes();
-			assertTrue("edge attr rmv event not fired on clear", this.edgeAttrRmvDetected);
 		}
 	}
 	@Test
@@ -609,10 +549,7 @@ public class SingleGraph_TSL {
 		SingleGraph sg = makeSingleGraph("TestCase40", false, true);
 		Node node1 = sg.addNode("Node1");
 		// auto-create-node
-		sg.addElementSink(new SimpleGraphEventSink());
-		this.nodeAddDetected = false;
 		sg.addEdge("EdgeDirected1", "Node1", "Node2", true);
-		assertTrue("implied node add event not fired",this.nodeAddDetected);
 		Iterator<Node> node_iter = sg.getNodeIterator();
 		Iterator<Edge> edge_iter = sg.getEdgeIterator();
 		String key = "attrib_key";
@@ -702,98 +639,5 @@ public class SingleGraph_TSL {
 			assertFalse("edge not directed",edge.isDirected());
 		}
 		assertTrue("attr label not found", node1.hasLabel(key));
-	}
-	
-	/**
-	 * event sink class
-	 *
-	 */
-	class SimpleGraphEventSink implements ElementSink, AttributeSink {
-		@Override
-		public void edgeAdded(String arg0, long arg1, String arg2, String arg3,
-				String arg4, boolean arg5) {
-			edgeAddDetected = true;
-		}
-
-		@Override
-		public void edgeRemoved(String arg0, long arg1, String arg2) {
-			edgeRemoveDetected = true;
-		}
-
-		@Override
-		public void graphCleared(String arg0, long arg1) {
-			graphClearDetected = true;
-		}
-
-		@Override
-		public void nodeAdded(String arg0, long arg1, String arg2) {
-			nodeAddDetected = true;
-		}
-
-		@Override
-		public void nodeRemoved(String arg0, long arg1, String arg2) {
-			nodeRemoveDetected = true;
-		}
-
-		@Override
-		public void stepBegins(String arg0, long arg1, double arg2) {
-			stepBeginDetected = true;
-			
-		}
-
-		@Override
-		public void edgeAttributeAdded(String arg0, long arg1, String arg2, String arg3, Object arg4) {
-			edgeAttrAddDetected = true;
-			
-		}
-
-		@Override
-		public void edgeAttributeChanged(String arg0, long arg1, String arg2, String arg3, Object arg4, Object arg5) {
-			edgeAttrChgDetected = true;
-			
-		}
-
-		@Override
-		public void edgeAttributeRemoved(String arg0, long arg1, String arg2, String arg3) {
-			edgeAttrRmvDetected = true;
-			
-		}
-
-		@Override
-		public void graphAttributeAdded(String arg0, long arg1, String arg2, Object arg3) {
-			graphAttrAddDetected = true;
-			
-		}
-
-		@Override
-		public void graphAttributeChanged(String arg0, long arg1, String arg2, Object arg3, Object arg4) {
-			graphAttrChgDetected = true;
-			
-		}
-
-		@Override
-		public void graphAttributeRemoved(String arg0, long arg1, String arg2) {
-			graphAttrRmvDetected = true;
-			
-		}
-
-		@Override
-		public void nodeAttributeAdded(String arg0, long arg1, String arg2, String arg3, Object arg4) {
-			nodeAttrAddDetected = true;
-			
-		}
-
-		@Override
-		public void nodeAttributeChanged(String arg0, long arg1, String arg2, String arg3, Object arg4, Object arg5) {
-			nodeAttrChgDetected = true;
-			
-		}
-
-		@Override
-		public void nodeAttributeRemoved(String arg0, long arg1, String arg2, String arg3) {
-			nodeAttrRmvDetected = true;
-			
-		}
-		
 	}
 }
